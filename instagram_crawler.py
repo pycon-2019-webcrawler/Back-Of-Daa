@@ -54,9 +54,9 @@ def crawl(hashtag, option = False):
             element_list.append({'text': j.text})
 
         img = driver.find_elements_by_css_selector('div.KL4Bh > img')
-        img_list = []
+        img_list = {'img_url': []}
         for j in img:
-            img_list.append({'img_url': j.get_attribute('src')})
+            img_list['img_url'].append(j.get_attribute('src'))
         element_list.append(img_list)
 
         full_list.append(element_list)
