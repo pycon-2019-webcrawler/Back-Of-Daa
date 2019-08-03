@@ -45,13 +45,18 @@ def crawl(hashtag, option = False):
         html = driver.page_source
         bs = BeautifulSoup(html, 'lxml')
 
-        user_id = driver.find_elements_by_css_selector('h2._6lAjh > a')
-        for j in user_id:
-            element_list.append({'username': j.get_attribute('title')})
+        user_id = driver.find_element_by_css_selector('h2._6lAjh > a')
+        element_list.append({'username': user_id.get_attribute('title')})
+
+        try:
+            user_profile_img = driver.find_element_by_css_selector('a._2dbep.qNELH.kIKUG > img')
+            element_list.append({'profile_img': user_profile_img.get_attribute('src')})
+        except:
+            element_list.append({'profile_img': None})
 
         div = bs.find('div', class_='C4VMK')
-        for j in div.find_all('span'):
-            element_list.append({'text': j.text})
+        span = div.find('span')
+        element_list.append({'text': span.text})
 
         img = driver.find_elements_by_css_selector('div.KL4Bh > img')
         img_list = {'img_url': []}
