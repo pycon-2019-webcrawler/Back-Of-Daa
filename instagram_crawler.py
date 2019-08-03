@@ -61,6 +61,5 @@ def crawl(hashtag, option = False):
 
         full_list.append(element_list)
 
-    return full_list
-
     driver.close()
+    return full_list
