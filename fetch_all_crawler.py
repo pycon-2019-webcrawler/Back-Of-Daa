@@ -3,7 +3,7 @@ import selenium
 import time
 from bs4 import BeautifulSoup
 
-def crawl_one(hashtag, last_user_link, option = False):
+def crawl_all(hashtag, option = False):
     '''
     지금 쓰는 chrome의 버전과 같은 버전의 chrome driver 다운로드 받아주세요! => https://chromedriver.chromium.org/downloads
     chrome driver가 있는 주소로 driver_addr 수정해주세요!
@@ -16,7 +16,6 @@ def crawl_one(hashtag, last_user_link, option = False):
     :return: crawled_list
     '''
     url = 'https://www.instagram.com/explore/tags/' + hashtag
-
     driver_addr = 'C:\ProgramData\Microsoft\Windows\Start Menu\Programs\chromedriver.exe'
 
     options = webdriver.ChromeOptions()
@@ -41,38 +40,32 @@ def crawl_one(hashtag, last_user_link, option = False):
     for i in link:
         user_link_list.append(i.get_attribute('href'))
 
-    element_list = []
+    for i in user_link_list[9:]:
+        element_list = []
+        driver.get(i)
+        html = driver.page_source
+        bs = BeautifulSoup(html, 'lxml')
 
-    if last_user_link == user_link_list[9]:
-        driver.close()
-        return None
+        user_id = driver.find_element_by_css_selector('h2._6lAjh > a')
+        element_list.append({'username': user_id.get_attribute('title')})
 
-    driver.get(user_link_list[9])
+        try:
+            user_profile_img = driver.find_element_by_css_selector('a._2dbep.qNELH.kIKUG > img')
+            element_list.append({'profile_img': user_profile_img.get_attribute('src')})
+        except selenium.common.exceptions.NoSuchElementException:
+            element_list.append({'profile_img': None})
 
-    html = driver.page_source
-    bs = BeautifulSoup(html, 'lxml')
+        div = bs.find('div', class_='C4VMK')
+        span = div.find('span')
+        element_list.append({'text': span.text})
 
-    user_id = driver.find_element_by_css_selector('h2._6lAjh > a')
-    element_list.append({'username': user_id.get_attribute('title')})
+        try:
+            img = driver.find_element_by_css_selector('div.KL4Bh > img')
+            element_list.append({'img': img.get_attribute('src')})
+        except selenium.common.exceptions.NoSuchElementException:
+            element_list.append({'img': None})
 
-    try:
-        user_profile_img = driver.find_element_by_css_selector('a._2dbep.qNELH.kIKUG > img')
-        element_list.append({'profile_img': user_profile_img.get_attribute('src')})
-    except selenium.common.exceptions.NoSuchElementException:
-        element_list.append({'profile_img': None})
-
-    div = bs.find('div', class_='C4VMK')
-    span = div.find('span')
-    element_list.append({'text': span.text})
-
-    try:
-        img = driver.find_element_by_css_selector('div.KL4Bh > img')
-        element_list.append({'img': img.get_attribute('src')})
-    except selenium.common.exceptions.NoSuchElementException:
-        element_list.append({'img': None})
-
-    full_list.append(element_list)
-    full_list.append(user_link_list[9])
+        full_list.append(element_list)
 
     driver.close()
     return full_list
