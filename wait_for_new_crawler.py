@@ -1,12 +1,14 @@
 from selenium import webdriver
 import time
 from bs4 import BeautifulSoup
+import multiprocessing
 
 
 new_user = ''
 last_user = ''
 
-def crawl_one(hashtag, option = False):
+
+def crawl(hashtag, option = False):
     global new_user, last_user
 
     url = 'https://www.instagram.com/explore/tags/' + hashtag
@@ -41,9 +43,32 @@ def crawl_one(hashtag, option = False):
         else:
             print('최신 게시물 등록됨!')
 
+            element_list = []
+            driver.get(new_user)
+            html = driver.page_source
+            bs = BeautifulSoup(html, 'lxml')
+
+            user_id = driver.find_element_by_css_selector('h2._6lAjh > a').get_attribute('title')
+            print(user_id)
+
+            try:
+                user_profile_img = driver.find_element_by_css_selector('a._2dbep.qNELH.kIKUG > img').get_attribute('src')
+                print(user_profile_img)
+            except:
+                print('None')
+
+            div = bs.find('div', class_='C4VMK')
+            span = div.find('span')
+            print(span.text)
+
+            img = driver.find_elements_by_css_selector('div.KL4Bh > img')
+            img_link = img[0].get_attribute('src')
+            print(img_link)
+
+            driver.get(url)
+
         time.sleep(1)
 
 
-
-
-crawl_one('pycon', option=False)
+if __name__ == '__main__':
+    crawl('pycon', option=False)
